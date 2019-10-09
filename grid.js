@@ -65,6 +65,35 @@ class Grid {
         }
       }
     }
+    this.check();
+  }
+
+  check()
+  {
+      if (this.check_from_left())
+        alert("ok");
+  }
+
+  check_from_left()
+  {
+    for (let i = 0; i < this.dim; i++)
+    {
+      let max = 0;
+      let max_count = 0;
+      for (let j = 0; j < this.dim; j++)
+      {
+        console.log(this.grid[j][i]);
+        if (this.grid[j][i] > max)
+        {
+          max = this.grid[j][i];
+          max_count++;
+        }
+      }
+      console.log(max, max_count);
+      if (max_count != this.left[i])
+        return false;
+    }
+    return true;
   }
 
 }
