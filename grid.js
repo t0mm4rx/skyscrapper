@@ -1,8 +1,8 @@
 class Grid {
 
     constructor(n) {
-        // nxn grid filled with 0 creation
-        this.grid = new Array(n).fill().map(() => new Array(n).fill(0));
+        // nxn grid filled with -1 creation
+        this.grid = new Array(n).fill().map(() => new Array(n).fill(-1));
         // n grid creation
         this.top = new Array(n).fill(0);
         this.right = new Array(n).fill(0);
@@ -65,77 +65,205 @@ class Grid {
                 }
             }
         }
-        this.check();
     }
 
-    check() {
-        return (this.check_left() &&
-            this.check_right() &&
-            this.check_top() &&
-            this.check_bottom());
+    check()
+    {
+        return check(grid.grid, grid.top, grid.bottom, grid.left, grid.right, grid.dim);
     }
 
-    check_left() {
-        for (let i = 0; i < this.dim; i++) {
-            let max = -1;
-            let max_changed = 0;
-            for (let j = 0; j < this.dim; j++) {
-                if (this.grid[j][i] > max) {
-                    max = this.grid[j][i];
-                    max_changed++;
-                }
-            }
-            if (max_changed != this.left[i])
+    solve()
+    {
+        //console.log(solve(this.grid, this.top, this.bottom, this.left, this.right, this.dim));
+        this.grid = solve(this.grid, this.top, this.bottom, this.left, this.right, this.dim);
+    }
+
+}
+
+function solve(grid, top, bottom, left, right, dim)
+{
+    // fill known cases to reduce brute force options
+    fill_grid(grid, top, bottom, dim);
+    if (is_full(grid, dim))
+    {
+        return (check(grid, top, bottom, left, right, dim));
+    }
+    let next_case = next_empty_case(grid, dim);
+    for (let i = 0; i < 4; i++)
+    {
+        let grid_cpy = copy_grid(grid, dim);
+
+        grid_cpy[next_case[0]][next_case[1]] = i;
+        if (solve(grid_cpy, top, bottom, left, right, dim))
+            return grid_cpy;
+    }
+}
+
+function is_full(grid, dim) {
+    for (let x = 0; x < dim; x++)
+    {
+        for (let y = 0; y < dim; y++)
+        {
+            if (grid[x][y] == -1)
                 return false;
         }
-        return true;
     }
+    return true;
+}
 
-    check_right() {
-        for (let i = 0; i < this.dim; i++) {
-            let max = -1;
-            let max_changed = 0;
-            for (let j = this.dim - 1; j >= 0; j--) {
-                if (this.grid[j][i] > max) {
-                    max = this.grid[j][i];
-                    max_changed++;
-                }
-            }
-            if (max_changed != this.right[i])
-                return false;
-        }
-        return true;
+function check(grid, top, bottom, left, right, dim) {
+    for (let x = 0; x < dim; x++)
+    {
+        if (!check_top(grid[x], top[x], dim))
+            return false;
+        if (!check_bottom(grid[x], bottom[x], dim))
+            return false;
     }
+    if (!check_left(grid, left, dim))
+        return false;
+    if (!check_right(grid, right, dim))
+        return false;
+    return true;
+}
 
-    check_bottom() {
-        for (let i = 0; i < this.dim; i++) {
-            let max = -1;
-            let max_changed = 0;
-            for (let j = this.dim - 1; j >= 0; j--) {
-                if (this.grid[i][j] > max) {
-                    max = this.grid[i][j];
-                    max_changed++;
-                }
-            }
-            if (max_changed != this.bottom[i])
-                return false;
+function check_top(row, target, dim) {
+    let max = -1;
+    let max_changed = 0;
+    for (let y = 0; y < dim; y++)
+    {
+        if (row[y] < 0)
+            return true;
+        if (row[y] > max)
+        {
+            max = row[y];
+            max_changed++;
         }
-        return true;
     }
+    if (new Set(row).size != row.length)
+        return false;
+    return (max_changed == target);
+}
 
-    check_top() {
-        for (let i = 0; i < this.dim; i++) {
-            let max = -1;
-            let max_changed = 0;
-            for (let j = 0; j < this.dim; j++) {
-                if (this.grid[i][j] > max) {
-                    max = this.grid[i][j];
-                    max_changed++;
-                }
-            }
-            if (max_changed != this.top[i])
-                return false;
+function check_bottom(row, target, dim) {
+    let max = -1;
+    let max_changed = 0;
+    for (let y = dim - 1; y >= 0; y--)
+    {
+        if (row[y] < 0)
+            return true;
+        if (row[y] > max)
+        {
+            max = row[y];
+            max_changed++;
         }
-        return true;
+    }
+    if (new Set(row).size != row.length)
+        return false;
+    return (max_changed == target);
+}
+
+function check_left(grid, target, dim) {
+    for (let y = 0; y < dim; y++)
+    {
+        let arr = [];
+        for (let x = 0; x < dim; x++)
+            arr.push(grid[x][y]);
+        if (!check_top(arr, target[y], dim))
+            return false;
+    }
+    return true;
+}
+
+function check_right(grid, target, dim) {
+    for (let y = 0; y < dim; y++)
+    {
+        let arr = [];
+        for (let x = 0; x < dim; x++)
+            arr.push(grid[x][y]);
+        if (!check_bottom(arr, target[y], dim))
+            return false;
+    }
+    return true;
+}
+
+function next_empty_case(grid, dim)
+{
+    for (let x = 0; x < dim; x++)
+    {
+        for (let y = 0; y < dim; y++)
+        {
+            if (grid[x][y] < 0)
+                return [x, y];
+        }
+    }
+    return undefined;
+}
+
+function copy_grid(grid, dim)
+{
+    let arr = new Array(dim).fill().map(() => new Array(dim).fill(-1));
+    for (let x = 0; x < dim; x++)
+    {
+        for (let y = 0; y < dim; y++)
+            arr[x][y] = grid[x][y];
+    }
+    return arr;
+}
+
+function fill_grid(grid, top, bottom, dim)
+{
+    for (let x = 0; x < dim; x++)
+    {
+        if (top[x] == dim)
+        {
+            for (let i = 0; i < dim; i++)
+                grid[x][i] = i;
+        }
+        if (bottom[x] == 4)
+        {
+            for (let i = 0; i < dim; i++)
+                grid[x][i] = dim - i - 1;
+        }
+
+        fill_missing(grid[x], dim);
+        fill_missing_columns(grid, dim);
+    }
+}
+
+function fill_missing(row, dim)
+{
+    let count = 0;
+    let last_y = -1;
+    for (let y = 0; y < dim; y++)
+    {
+        if (row[y] < 0)
+        {
+            count++;
+            last_y = y;
+        }
+    }
+    if (count == 1)
+    {
+        for (let i = 0; i < dim; i++)
+        {
+            if (row.indexOf(i) < 0)
+            {
+                row[last_y] = i;
+                return;
+            }
+        }
+    }
+}
+
+function fill_missing_columns(grid, dim)
+{
+    for (let y = 0; y < dim; y++)
+    {
+        let arr = [];
+        for (let x = 0; x < dim; x++)
+            arr.push(grid[x][y]);
+        fill_missing(arr, dim);
+        for (let x = 0; x < dim; x++)
+            grid[x][y] = arr[x];
     }
 }
