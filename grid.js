@@ -10,10 +10,14 @@ class Grid {
         this.left = new Array(n).fill(0);
 
         // test data
-        this.top = [1, 2, 4, 2];
+        /*this.top = [1, 2, 4, 2];
         this.right = [2, 3, 1, 2];
         this.bottom = [4, 2, 1, 2];
-        this.left = [1, 2, 3, 3];
+        this.left = [1, 2, 3, 3];*/
+        this.top = [3, 3, 1, 2];
+        this.right = [2, 1, 3, 4];
+        this.bottom = [1, 2, 3, 3];
+        this.left = [2, 2, 2, 2];
 
         this.dim = n;
     }
