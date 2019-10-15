@@ -75,7 +75,8 @@ class Grid {
     solve()
     {
         //console.log(solve(this.grid, this.top, this.bottom, this.left, this.right, this.dim));
-        this.grid = solve(this.grid, this.top, this.bottom, this.left, this.right, this.dim);
+        for (let _ = 0; _ < 10; _++)
+            this.grid = solve(this.grid, this.top, this.bottom, this.left, this.right, this.dim);
     }
 
 }
@@ -86,7 +87,11 @@ function solve(grid, top, bottom, left, right, dim)
     fill_grid(grid, top, bottom, dim);
     if (is_full(grid, dim))
     {
-        return (check(grid, top, bottom, left, right, dim));
+        if (check(grid, top, bottom, left, right, dim))
+        {
+            return grid;
+        }
+        return null;
     }
     let next_case = next_empty_case(grid, dim);
     for (let i = 0; i < 4; i++)
@@ -94,7 +99,7 @@ function solve(grid, top, bottom, left, right, dim)
         let grid_cpy = copy_grid(grid, dim);
 
         grid_cpy[next_case[0]][next_case[1]] = i;
-        if (solve(grid_cpy, top, bottom, left, right, dim))
+        if (solve(grid_cpy, top, bottom, left, right, dim) != null)
             return grid_cpy;
     }
 }
